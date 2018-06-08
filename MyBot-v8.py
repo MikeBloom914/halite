@@ -9,7 +9,7 @@ try:
 except:
     pass
 
-game = hlt.Game("SheckyBotSoFar")
+game = hlt.Game("SheckyBotSolo")
 logging.info("Go Shecky bot")
 
 
@@ -117,14 +117,6 @@ while True:
                 else:
                     docking(my_planets_not_full[0], 0)
 
-                # else:
-                #     if distance_between_my_ship_and_enemy_ship < ship.calculate_distance_between(my_planets_not_full[0]) * .6:
-                #         navigate_ship(closest_enemy_ships[0])
-                #     else:
-                #         docking(my_planets_not_full[0], 0)
-                # else:
-                #     navigate_ship(closest_enemy_ships[0])
-
             elif len(closest_empty_planets) > 0 and len(closest_enemy_ships) > 0:
                 if ship.can_dock(closest_empty_planets[0]):
                     command_queue.append(ship.dock(closest_empty_planets[0]))
@@ -142,23 +134,20 @@ while True:
 
             elif len(closest_enemy_ships) > 0:
                 navigate_ship(closest_enemy_ships[0])
-                #         ### have bots chase me when there are x amount of ships ###
-                #         ### can do distance to coordinates for diff coordinance ###
-
-                #         # logging.info("turn number: {}".format(turn_num))
-                #         # logging.info("len of my_planets: " + str(len(my_planets)))
-                #         # logging.info("len of my_planets_not_full: " + str(len(my_planets_not_full)))
-                #         # logging.info("enemy_planets_not_full: " + str(len(enemy_planets_not_full)))
-
-                ### Make sure starting ships do not crash ###
-
-                ### After starting ships start to make more ships ###
 
     turn_num += 1
     logging.info("Turn: " + str(turn_num))
     game.send_command_queue(command_queue)
 
-##################WHEN DONE THROW IN A BUNCH OF RANDOM STUFF TO THROW OTHER PEOPLE OFF, IE VARIABLES,################
-  ######################################FUUNCTIONS, COMMENTS SAYING HOW IMPORT IT IS #########################################
     #  turn over
 # game over
+
+##################WHEN DONE THROW IN A BUNCH OF RANDOM STUFF TO THROW OTHER PEOPLE OFF, IE VARIABLES,################
+  ######################################FUUNCTIONS, COMMENTS SAYING HOW IMPORT IT IS #########################################
+
+    #         ### have bots chase me when there are x amount of ships ###
+    #         ### can do distance to coordinates for diff coordinance ###
+
+    ### Make sure starting ships do not crash ###
+
+    ### After starting ships start to make more ships ###
