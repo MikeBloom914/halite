@@ -107,6 +107,10 @@ class Planet(Entity):
         self._docked_ship_ids = docked_ships
         self._docked_ships = {}
 
+    def get_remaining_resources(self):
+
+        return self.remaining_resources
+
     def get_docked_ship(self, ship_id):
         """
         Return the docked ship designated by its id.
@@ -206,7 +210,7 @@ class Planet(Entity):
 class Ship(Entity):
     """
     A ship in the game.
-    
+
     :ivar id: The ship ID.
     :ivar x: The ship x-coordinate.
     :ivar y: The ship y-coordinate.
@@ -235,6 +239,10 @@ class Ship(Entity):
         self.planet = planet if (docking_status is not Ship.DockingStatus.UNDOCKED) else None
         self._docking_progress = progress
         self._weapon_cooldown = cooldown
+
+    def get_planet(self):
+
+        return self.planet
 
     def thrust(self, magnitude, angle):
         """

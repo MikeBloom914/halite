@@ -1,11 +1,11 @@
 ###############LARGE PLANET FINDER###########
-
+################ INCREASED SPEED ############
 
 import hlt
 import logging
 from collections import OrderedDict
 
-game = hlt.Game("LargePlanet")
+game = hlt.Game("SheckyBot_v1large")
 logging.info("Go LargePlanet bot")
 
 
@@ -23,7 +23,7 @@ while True:
     team_ships = game_map.get_me().all_ships()
 
     for ship in game_map.get_me().all_ships():
-        #shipid = ship.id
+
         if ship.docking_status != ship.DockingStatus.UNDOCKED:
             continue
 

@@ -1,16 +1,11 @@
 import hlt
 import logging
-import os
 from collections import OrderedDict
 
-try:
-    os.remove("_1SheckyBotktest")
-    os.remove("_0SheckyBot")
-except:
-    pass
-
-game = hlt.Game("SheckyBotktest'")
+game = hlt.Game("SheckyBot_v3funct")
 logging.info("Go Shecky bot")
+
+#### TO DO. ADD GOING TO VULNERABLE PLANETS AND TEAM STUFF####
 
 
 def largest_dockable_planet(planets):
@@ -64,50 +59,33 @@ while True:
     all_planets = game_map.all_planets()
     outside_planets = [planet for planet in all_planets if planet.id > 3]
 
+    players = game_map.all_players()
+    if len(players) == 2:
+        my_team_ships = my_ships
+        team_mate_id = my_id
+    else:
+        team_mate_id = None
+        if my_id == 0 or my_id == 1:
+            team_mate_id = my_id + 2
+        elif my_id == 2 or my_id == 3:
+            team_mate_id = my_id - 2
+
+        team_mate_ships = game_map.get_player(team_mate_id).all_ships()
+        my_team_ships = my_ships + team_mate_ships
+
+    # logging.info("my id:" + str(my_id))
+    # logging.info("teamid:" + str(team_mate_id))
+    # logging.info("my ships:" + str(len(my_ships)))
+    # logging.info("teamships: " + str(len(team_mate_ships)))
+    # logging.info("myteam" + str(len(my_team_ships)))
+
     command_queue = []
-    # for planet in all_planets:
-    #     logging.info('{} {}'.format(planet.id, planet.get_remaining_resources()))
 
     for ship in my_ships:
         shipid = ship.id
 
         if ship.docking_status != ship.DockingStatus.UNDOCKED:
-            # continue
-            #
-            # State: the ship is undocked
-            #
-            if ship.get_planet() != None:
-                # logging.info('{}'.format(ship.get_planet()))
-                #
-                # State: the ship is docked on a planet with a globally unique identifier
-                #
-                for planet in all_planets:
-                    # logging.info('planet id: {}'.format(planet.id))
-                    logging.info('planet_id: {}'.format(planet.id))
-                    logging.info('type(planet_id): {}'.format(type(planet.id)))
-
-                    logging.info('ship_id: {}'.format(ship.get_planet().id))
-                    logging.info('type(ship_id): {}'.format(type(ship.get_planet().id)))
-                    # FIXME ship.get_planet returns a weird type (hlt.entity.Planet),
-                    # but we only want the id of the planet so the following control flow
-                    # behaves as expected.
-                    if planet.id == ship.get_planet().id:
-                        #
-                        # Desired State: the value of the iterator is equal to the value of the
-                        #                globally unique identifier that the ship is docked on
-                        #
-                        logging.info('planet id equals ship get planet')
-                        if planet.get_remaining_resources() <= 100:
-                            command_queue.append(ship.undock())
-                            logging.info('{} {}'.format(planet.id, planet.get_remaining_resources()))
-
-                            logging.info('undocking' + str(turn_num))
-                            # navigate_ship(closest_enemy_ships[0])
-
-            else:
-                continue
-
-                #
+            continue
 
         entities_by_distance = game_map.nearby_entities_by_distance(ship)
         entities_by_distance = OrderedDict(sorted(entities_by_distance.items(), key=lambda x: x[0]))
@@ -117,7 +95,7 @@ while True:
         my_undocked_ships = [ship for ship in my_ships if ship.docking_status == ship.DockingStatus.UNDOCKED]
         my_docked_ships = [ship for ship in my_ships if ship.docking_status == ship.DockingStatus.DOCKED]
 
-        closest_enemy_ships = [entities_by_distance[distance][0] for distance in entities_by_distance if isinstance(entities_by_distance[distance][0], hlt.entity.Ship) and entities_by_distance[distance][0] not in my_ships]
+        closest_enemy_ships = [entities_by_distance[distance][0] for distance in entities_by_distance if isinstance(entities_by_distance[distance][0], hlt.entity.Ship) and entities_by_distance[distance][0] not in my_team_ships]
 
     ### Planet info ###
         closest_empty_planets = [entities_by_distance[distance][0] for distance in entities_by_distance if isinstance(entities_by_distance[distance][0], hlt.entity.Planet) and not entities_by_distance[distance][0].is_owned()]
@@ -128,8 +106,16 @@ while True:
         my_planets_full = [planet for planet in my_planets if planet.is_full()]
         my_planets_not_full = [planet for planet in my_planets if not planet.is_full()]
 
-        enemy_planets = [planet for planet in closest_owned_planets if planet.owner.id != my_id]
-        enemy_planets_not_full = [planet for planet in enemy_planets if not planet.is_full()]
+        my_team_planets = [planet for planet in closest_owned_planets if planet.owner.id == my_id or planet.owner.id == team_mate_id]
+
+        enemy_planets = [planet for planet in closest_owned_planets if planet.owner.id != my_id or planet.owner.id != team_mate_id]
+
+        vulnerable_enemy_planets = [planet for planet in enemy_planets if len(planet.all_docked_ships()) == 1]
+
+        vulnerable_enemy_ships = [ship for ship in vulnerable_enemy_planets]
+
+        logging.info("vul:" + str(len(vulnerable_enemy_planets)))
+        #     continue
 
         closest_planets = [entities_by_distance[distance][0] for distance in entities_by_distance if isinstance(entities_by_distance[distance][0], hlt.entity.Planet)]
         closest_outside_planets = [planet for planet in closest_planets if planet.id > 3]
@@ -141,6 +127,8 @@ while True:
 
         if turn_num <= 6 and len(my_ships) > len(closest_enemy_ships) + 2:
             navigate_ship(closest_enemy_ships[0])
+            #logging.info("myships: " + str(my_id))
+            #logging.info("team_ships: " + str(team_ship))
 
         else:
             if len(my_planets_not_full) > 0 and len(closest_enemy_ships) > 0:
@@ -151,8 +139,10 @@ while True:
 
                 if distance_between_my_ship_and_enemy_ship < 18:
                     navigate_ship(closest_enemy_ships[0])
+                    logging.info("kill close ship:")
                 else:
                     docking(my_planets_not_full[0], 0)
+                    logging.info("fillerUp:")
 
             elif len(closest_empty_planets) > 0 and len(closest_enemy_ships) > 0:
                 if ship.can_dock(closest_empty_planets[0]):
@@ -171,7 +161,7 @@ while True:
 
             elif len(closest_enemy_ships) > 0:
                 navigate_ship(closest_enemy_ships[0])
-    logging.info("turn_num: " + str(turn_num))
+
     turn_num += 1
     logging.info("Turn: " + str(turn_num))
     game.send_command_queue(command_queue)

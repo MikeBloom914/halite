@@ -2,9 +2,11 @@ import hlt
 import logging
 from collections import OrderedDict
 
-game = hlt.Game("Tiger Blood")
-logging.info("Going to drink tiger blood")
+game = hlt.Game("Tiger Blood 15")
+logging.info("Go Tiger Blood")
 
+#### TO DO ADD GOING TO VULNERABLE PLANETS AND TEAM STUFF####
+### ADD VIABLE PLANETS TO ALL PLANETS LISTS NECESSARY###
 
 # This function gets list of planets in order of size by radius starting with the max #
 
@@ -109,12 +111,11 @@ while True:
         # entities[ship.id] = {'state': ship.docking_status}
         if ship.docking_status != ship.DockingStatus.UNDOCKED:
             if ship.planet.remaining_resources == 0:
-                if ship.id % 9 != 0:
-                    command_queue.append(ship.undock())
-                    logging.info('undocking by 4' + str(turn_num))
+                command_queue.append(ship.undock())
+                logging.info('undocking' + str(turn_num))
 
-                else:
-                    continue
+            else:
+                continue
 
         else:
             entities_by_distance = game_map.nearby_entities_by_distance(ship)
@@ -124,7 +125,7 @@ while True:
 
             my_planets = [planet for planet in closest_owned_planets if planet.owner.id == my_id]
             my_planets_full = [planet for planet in my_planets if planet.is_full()]
-            my_planets_not_full = [planet for planet in my_planets if not planet.is_full() and planet.get_remaining_resources() != 0]
+            my_planets_not_full = [planet for planet in my_planets if not planet.is_full()]
 
             ### Ship info ###
 
@@ -153,15 +154,15 @@ while True:
             ##### GAME TIME #####
             ##### I pretty much tested out every theory with every list in every order that I could think of...easily spend over a week just testing that out and came up with this final answer as winning the most #####
 
-            if turn_num <= 8:
+            if turn_num <= 7:
                 if ship.id == 0 or ship.id == 5 or ship.id == 10 or ship.id == 15:
-                    docking(closest_empty_viable_planets[0], 0)
-                if ship.id == 1 or ship.id == 6 or ship.id == 11 or ship.id == 16:
-                    docking(closest_empty_viable_planets[0], -1.5)
-                if ship.id == 2 or ship.id == 7 or ship.id == 12 or ship.id == 17:
                     docking(closest_empty_viable_planets[0], -.5)
+                if ship.id == 1 or ship.id == 6 or ship.id == 11 or ship.id == 16:
+                    docking(closest_empty_viable_planets[0], -1)
+                if ship.id == 2 or ship.id == 7 or ship.id == 12 or ship.id == 17:
+                    docking(closest_empty_viable_planets[0], 0)
                 if ship.id == 3 or ship.id == 8 or ship.id == 13 or ship.id == 18:
-                    docking(closest_empty_viable_planets[0], -1.5)
+                    docking(largest_dockable_planet(closest_outside_planets), -1.5)
                 if ship.id == 4 or ship.id == 9 or ship.id == 14 or ship.id == 19:
                     docking(largest_dockable_planet(closest_outside_planets), 0)
 
@@ -175,14 +176,15 @@ while True:
 
                         if len(closest_enemy_ships) > 0:
 
-                            if distance(ship, closest_enemy_ships[0]) < 20:
+                            if distance(ship, closest_enemy_ships[0]) < 18:
+
                                 navigate_ship(closest_enemy_ships[0], 0)
-                                logging.info("kill close ship")
+                                # logging.info("kill close ship")
                                 continue
                             else:
                                 if ship.can_dock(my_planets_not_full[0]):
                                     command_queue.append(ship.dock(my_planets_not_full[0]))
-                                    logging.info("dock unfull planet")
+                                    # logging.info("dock unfull planet")
                                     continue
                             # logging.info("myships: " + str(my_id))
                             # logging.info("team_ships: " + str(team_ship))
@@ -191,33 +193,41 @@ while True:
                         if len(closest_enemy_ships) > 0:
                             if ship.can_dock(closest_empty_viable_planets[0]):
                                 command_queue.append(ship.dock(closest_empty_viable_planets[0]))
-                                logging.info("docking empty planet")
+                                # logging.info("dock empty planet")
                                 continue
 
                             else:
-                                if distance(ship, closest_enemy_ships[0]) <= (distance(ship, closest_empty_viable_planets[0]) * .5):
+                                if distance(ship, closest_enemy_ships[0]) <= (distance(ship, closest_empty_viable_planets[0]) * .4):
                                     navigate_ship(closest_enemy_ships[0], 0)
-                                    logging.info("getting close enemy ship")
+                                    # logging.info("getting en ship")
 
                                 else:
                                     navigate_ship(closest_empty_viable_planets[0], 0)
-                                    logging.info("going to empty planet")
+                                    # logging.info("go to empty planet")
 
                     elif len(closest_enemy_ships) > 0:
-
-                        if distance(ship, closest_enemy_ships[0]) < 20:
+                        # if len(vulnerable_enemy_planets) > 0:
+                        if distance(ship, closest_enemy_ships[0]) < 18:
                             navigate_ship(closest_enemy_ships[0], 0)
-                            logging.info("kill close ship ")
+                            # logging.info("kill close ship")
                             continue
-
                         if len(vulnerable_enemy_ships) > 0:
 
-                            if distance(ship, vulnerable_enemy_ships[0]) <= (distance(ship, closest_enemy_ships[0]) * .5):
-                                navigate_ship(vulnerable_enemy_ships[0], 0)
-                                logging.info("getting vulnerable ship")
+                            if len(enemy_defenseless_ships) > 0:
 
+                                if distance(ship, enemy_defenseless_ships[0]) < (distance(ship, vulnerable_enemy_ships[0]) * .4):
+                                    navigate_ship(enemy_defenseless_ships[0], 0)
+
+                                else:
+                                    navigate_ship(vulnerable_enemy_ships[0], 0)
                             else:
-                                navigate_ship(closest_enemy_ships[0], -1)
+
+                                if distance(ship, vulnerable_enemy_ships[0]) < distance(ship, closest_enemy_ships[0]) * .4:
+                                    navigate_ship(vulnerable_enemy_ships[0], 0)
+                                    logging.info("vulnerable_enemy_ships")
+
+                                else:
+                                    navigate_ship(closest_enemy_ships[0], -1)
 
                         else:
                             navigate_ship(closest_enemy_ships[0], 0)
